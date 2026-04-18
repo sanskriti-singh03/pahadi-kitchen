@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order_id }} — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="container" style="max-width:680px;">
+    <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+      <div>
+        <h1 class="page-title">Order Receipt</h1>
+        <p class="page-sub">{{ order_id }}</p>
+      </div>
+      <a href="{{ url_for('history') }}" class="btn btn-outline btn-sm">← Back to Orders</a>
+    </div>
+    <pre class="bill-pre">{{ bill_text }}</pre>
+    <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="{{ url_for('menu_page') }}" class="btn btn-primary">Order Again</a>
+      <a href="{{ url_for('history') }}" class="btn btn-outline">All Orders</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="bill-wrap">
+    <div class="bill-card">
+
+      <div class="bill-top">
+        <div class="check">✅</div>
+        <h2>Order Confirmed!</h2>
+        <div class="oid"># {{ order_id }}</div>
+      </div>
+
+      <div class="bill-meta">
+        <span><strong>Customer:</strong> {{ username }}</span>
+        <span><strong>Date:</strong> {{ timestamp }}</span>
+      </div>
+
+      <div class="bill-body">
+        <table class="bill-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th style="text-align:center;">Qty</th>
+              <th style="text-align:right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td>{{ r.item.name }}</td>
+              <td style="text-align:center;">{{ r.qty }}</td>
+              <td style="text-align:right;">Rs. {{ "%.2f"|format(r.amount) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="bill-totals">
+          <div class="bt-row">
+            <span class="lbl">Subtotal</span>
+            <span>Rs. {{ "%.2f"|format(subtotal) }}</span>
+          </div>
+          <div class="bt-row">
+            <span class="lbl">GST (5%)</span>
+            <span>Rs. {{ "%.2f"|format(tax) }}</span>
+          </div>
+          <div class="bt-row grand">
+            <span>Total Paid</span>
+            <span>Rs. {{ "%.2f"|format(total) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bill-foot">
+        <p class="thank">Thank you for dining with Pahadi Kitchen 🏔</p>
+        <p style="margin-top:.4rem;">Your bill has been saved. Order ID: <code>{{ order_id }}</code></p>
+        <div style="display:flex;gap:.75rem;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;">
+          <a href="{{ url_for('track_order', order_id=order_id) }}" class="btn btn-green btn-lg">
+            📍 Track Order
+          </a>
+          <a href="{{ url_for('menu_page') }}" class="btn btn-outline">Order Again</a>
+          {% if current_user and current_user != 'Guest' %}
+            <a href="{{ url_for('history') }}" class="btn btn-outline">My Orders</a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

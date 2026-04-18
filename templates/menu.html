@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Menu — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="container">
+    <div style="margin-bottom:1.5rem;">
+      <h1 class="page-title">Our Pahadi Menu</h1>
+      <p class="page-sub">Authentic dishes from the Kumaon & Garhwal hills of Uttarakhand</p>
+    </div>
+
+    <!-- Filter bar -->
+    <form method="get" action="{{ url_for('menu_page') }}" class="filter-bar">
+      <input type="text" name="search" placeholder="🔍  Search dishes..." value="{{ search }}" autocomplete="off">
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <label>Max price</label>
+        <input type="number" name="max_price" placeholder="e.g. 100" value="{{ max_price }}" style="width:100px;" min="1">
+      </div>
+      <input type="hidden" name="category" value="{{ category }}">
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      {% if search or max_price or category %}
+        <a href="{{ url_for('menu_page') }}" class="btn btn-outline btn-sm">Clear</a>
+      {% endif %}
+    </form>
+
+    <!-- Category tabs -->
+    <div class="cat-tabs">
+      <a href="{{ url_for('menu_page', search=search, max_price=max_price) }}"
+         class="cat-tab {% if not category %}active{% endif %}">All</a>
+      {% for cat in categories %}
+        <a href="{{ url_for('menu_page', category=cat, search=search, max_price=max_price) }}"
+           class="cat-tab {% if category == cat %}active{% endif %}">
+          {{ cat_icons.get(cat, '🍽') }} {{ cat }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Menu grid -->
+    {% if items %}
+      <div class="menu-grid">
+        {% for item in items %}
+        <div class="menu-card">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-category">{{ cat_icons.get(item.category, '🍽') }} {{ item.category }}</span>
+              <span class="card-veg-dot" title="Vegetarian indicator"></span>
+            </div>
+            <div class="card-name">{{ item.name }}</div>
+            {% if item.desc %}
+              <div class="card-desc">{{ item.desc }}</div>
+            {% endif %}
+          </div>
+          <div class="card-footer">
+            <span class="card-price">Rs. {{ "%.0f"|format(item.price) }}</span>
+            <form method="post" action="{{ url_for('cart_add') }}" style="display:flex;align-items:center;gap:.5rem;">
+              <input type="hidden" name="item_id" value="{{ item.item_id }}">
+              <div class="qty-wrap">
+                <button type="button" class="qty-btn qty-dec">−</button>
+                <input type="number" name="qty" class="qty-input" value="1" min="1" max="99">
+                <button type="button" class="qty-btn qty-inc">+</button>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">Add</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <div class="e-icon">🏔</div>
+        <h3>No dishes found</h3>
+        <p>Try a different search or filter.</p>
+        <a href="{{ url_for('menu_page') }}" class="btn btn-outline" style="margin-top:1rem;">View All</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

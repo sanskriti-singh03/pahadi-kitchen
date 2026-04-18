@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Pahadi Kitchen — Authentic Himalayan Food{% endblock %}
+
+{% block content %}
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <span class="hero-badge">🏔 Uttarakhand · Himachal · Kumaon</span>
+      <h1 class="hero-title">
+        Flavours From<br>
+        <em>The Mountains</em>
+      </h1>
+      <p class="hero-sub">
+        Slow-cooked dals, wild fern fritters, millet breads & Himalayan sweets —
+        order authentic Pahadi food, the way it's always been made.
+      </p>
+      <div class="hero-cta">
+        <a href="{{ url_for('menu_page') }}" class="btn btn-primary btn-lg">Explore Menu</a>
+        {% if not current_user %}
+          <a href="{{ url_for('login') }}" class="btn btn-ghost btn-lg">Sign In</a>
+        {% else %}
+          <a href="{{ url_for('cart_page') }}" class="btn btn-ghost btn-lg">View Cart</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Mountain silhouette wave -->
+  <svg class="hero-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,90 L0,55 L80,30 L160,55 L260,10 L360,48 L440,18 L540,52 L620,22 L720,60 L800,28 L900,58 L980,12 L1080,50 L1160,20 L1260,55 L1340,32 L1440,60 L1440,90 Z"/>
+  </svg>
+</section>
+
+<!-- ── Feature strip ── -->
+<section class="features">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <h3>100% Pahadi Menu</h3>
+        <p>Every dish rooted in Kumaoni & Garhwali tradition — no fusion, no shortcuts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🫙</div>
+        <h3>Jakhiya & Wild Spices</h3>
+        <p>Tempered with rare Himalayan spices you won't find on any other menu.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌾</div>
+        <h3>Ancient Millets</h3>
+        <p>Mandua (finger millet) & Jhangora (barnyard millet) — nutritious & gluten-free.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🍃</div>
+        <h3>Seasonal Specials</h3>
+        <p>Buransh sharbat, Singal fritters & Kafal drinks change with the mountains.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧾</div>
+        <h3>Order History</h3>
+        <p>Login to save your orders & re-view detailed bills anytime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA banner ── -->
+<section style="padding: 1rem 0 3.5rem;">
+  <div class="container" style="text-align:center;">
+    <div style="background: linear-gradient(135deg,#152B1E,#1e3d2b); border-radius: 18px; padding: 2.5rem 2rem; color:#fff; position:relative; overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(196,98,45,.2),transparent 60%);pointer-events:none;"></div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;margin-bottom:.5rem;position:relative;">Ready to taste the mountains?</h2>
+      <p style="color:rgba(255,255,255,.6);margin-bottom:1.75rem;font-size:.95rem;position:relative;">Browse our full Pahadi menu — from Kafuli to Bal Mithai.</p>
+      <a href="{{ url_for('menu_page') }}" class="btn btn-primary btn-lg" style="position:relative;">Order Now 🍛</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

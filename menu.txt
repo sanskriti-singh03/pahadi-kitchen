@@ -1,0 +1,16 @@
+1|Veg Spring Rolls|Starters|60.00
+2|Chicken Wings|Starters|120.00
+3|Paneer Tikka|Starters|150.00
+4|Garlic Bread|Starters|80.00
+5|Veg Fried Rice|Main Course|130.00
+6|Chicken Biryani|Main Course|200.00
+7|Paneer Butter Masala|Main Course|180.00
+8|Dal Tadka|Main Course|110.00
+9|Butter Naan|Main Course|40.00
+10|Gulab Jamun|Desserts|70.00
+11|Ice Cream (2 scoops)|Desserts|90.00
+12|Ras Malai|Desserts|100.00
+13|Cold Coffee|Drinks|80.00
+14|Fresh Lime Soda|Drinks|50.00
+15|Mango Lassi|Drinks|70.00
+16|Masala Chai|Drinks|30.00

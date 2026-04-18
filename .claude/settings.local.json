@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/sanskriti/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/3803be49-42a4-4b94-8979-b60b814c3835/4346b87b-0c12-4462-a8fd-9b30f5d79471/skills/docx/**)",
+      "Bash(python scripts/office/unpack.py \"/Users/sanskriti/Downloads/Food_Ordering_System_Report.docx\" /tmp/food_order_unpacked/)",
+      "Bash(python3 scripts/office/unpack.py \"/Users/sanskriti/Downloads/Food_Ordering_System_Report.docx\" /tmp/food_order_unpacked/)",
+      "Bash(pip3 install:*)",
+      "Bash(extract-text \"/Users/sanskriti/Downloads/Food_Ordering_System_Report.docx\")",
+      "Bash(pandoc \"/Users/sanskriti/Downloads/Food_Ordering_System_Report.docx\" -t markdown)",
+      "Bash(pandoc \"/Users/sanskriti/Downloads/Food_Ordering_System_Report.docx\" -t plain)",
+      "Bash(python3 -c ':*)",
+      "Bash(python3 app.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5000/)"
+    ]
+  }
+}

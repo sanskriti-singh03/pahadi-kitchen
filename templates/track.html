@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}Track Order — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="container" style="max-width:960px;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.75rem;">
+      <div>
+        <h1 class="page-title">Live Order Tracking</h1>
+        <p class="page-sub">Order <code>{{ order_id }}</code> &nbsp;·&nbsp; Customer: <strong>{{ status.customer }}</strong></p>
+      </div>
+      <a href="{{ url_for('menu_page') }}" class="btn btn-outline btn-sm">← Back to Menu</a>
+    </div>
+
+    <div class="track-layout">
+
+      <!-- ── Left: Status timeline ── -->
+      <div class="track-tl-wrap">
+        <div class="tl">
+
+          <div class="tl-step" id="tl-placed">
+            <div class="tl-dot done"></div>
+            <div class="tl-body">
+              <div class="tl-label">Order Placed</div>
+              <div class="tl-time" id="t-placed">—</div>
+            </div>
+          </div>
+
+          <div class="tl-connector" id="conn-accepted"></div>
+          <div class="tl-step" id="tl-accepted">
+            <div class="tl-dot" id="dot-accepted"></div>
+            <div class="tl-body">
+              <div class="tl-label">Order Accepted</div>
+              <div class="tl-time" id="t-accepted">Awaiting restaurant…</div>
+            </div>
+          </div>
+
+          <div class="tl-connector" id="conn-preparing"></div>
+          <div class="tl-step" id="tl-preparing">
+            <div class="tl-dot" id="dot-preparing"></div>
+            <div class="tl-body">
+              <div class="tl-label">Being Prepared</div>
+              <div class="tl-time" id="t-preparing">—</div>
+            </div>
+          </div>
+
+          <div class="tl-connector" id="conn-driver"></div>
+          <div class="tl-step" id="tl-driver">
+            <div class="tl-dot" id="dot-driver"></div>
+            <div class="tl-body">
+              <div class="tl-label">Driver Assigned</div>
+              <div class="tl-time" id="t-driver">—</div>
+            </div>
+          </div>
+
+          <div class="tl-connector" id="conn-delivered"></div>
+          <div class="tl-step" id="tl-delivered">
+            <div class="tl-dot" id="dot-delivered"></div>
+            <div class="tl-body">
+              <div class="tl-label">Delivered</div>
+              <div class="tl-time" id="t-delivered">—</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Right: Live status + map + driver ── -->
+      <div class="track-right">
+
+        <!-- Status banner -->
+        <div class="status-banner" id="status-banner">
+          <div class="sb-icon" id="sb-icon">⏳</div>
+          <div>
+            <div class="sb-title" id="sb-title">Waiting for confirmation</div>
+            <div class="sb-sub"   id="sb-sub">The restaurant will confirm your order shortly</div>
+          </div>
+        </div>
+
+        <!-- ETA pill -->
+        <div class="eta-pill" id="eta-pill" style="display:none;">
+          <span class="eta-num" id="eta-num">25</span>
+          <span class="eta-label">min away</span>
+        </div>
+
+        <!-- Mountain delivery map -->
+        <div id="map-wrap" style="display:none;margin-bottom:1rem;">
+          <div class="map-label">Live Delivery Map</div>
+          <div class="map-container">
+            <svg id="delivery-svg" viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:12px;">
+              <!-- Sky -->
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stop-color="#0b1f14"/>
+                  <stop offset="100%" stop-color="#1a3a2a"/>
+                </linearGradient>
+              </defs>
+              <rect width="520" height="190" fill="url(#sky)"/>
+              <!-- Stars -->
+              <circle cx="60"  cy="18" r="1.2" fill="#fff" opacity=".5"/>
+              <circle cx="170" cy="12" r="1"   fill="#fff" opacity=".4"/>
+              <circle cx="290" cy="22" r="1.5" fill="#fff" opacity=".6"/>
+              <circle cx="430" cy="10" r="1"   fill="#fff" opacity=".4"/>
+              <circle cx="370" cy="28" r="1.2" fill="#fff" opacity=".3"/>
+              <circle cx="100" cy="30" r="1"   fill="#fff" opacity=".35"/>
+              <!-- Far mountains -->
+              <polygon points="0,140 70,65 140,140"   fill="#0d2215" opacity=".85"/>
+              <polygon points="110,140 200,42 290,140" fill="#0a1c12"/>
+              <polygon points="260,140 355,58 450,140" fill="#0d2215" opacity=".85"/>
+              <polygon points="390,140 465,72 520,140" fill="#0a1c12"/>
+              <!-- Snow caps -->
+              <polygon points="70,65 82,80 58,80"    fill="rgba(255,255,255,.75)"/>
+              <polygon points="200,42 214,60 186,60"  fill="rgba(255,255,255,.8)"/>
+              <polygon points="355,58 368,75 342,75"  fill="rgba(255,255,255,.7)"/>
+              <!-- Ground -->
+              <rect y="140" width="520" height="50" fill="#1e3d2b"/>
+              <!-- Road -->
+              <path id="road" d="M 40,158 C 130,146 195,168 270,156 S 400,146 480,151"
+                    stroke="#2e2e2e" stroke-width="16" fill="none" stroke-linecap="round"/>
+              <path d="M 40,158 C 130,146 195,168 270,156 S 400,146 480,151"
+                    stroke="#555" stroke-width="2" fill="none" stroke-dasharray="14,10"/>
+              <!-- Trees -->
+              <text x="88"  y="141" font-size="15" opacity=".9">🌲</text>
+              <text x="175" y="137" font-size="13" opacity=".8">🌲</text>
+              <text x="330" y="142" font-size="15" opacity=".9">🌲</text>
+              <text x="415" y="138" font-size="13" opacity=".75">🌲</text>
+              <!-- Restaurant pin -->
+              <circle cx="40" cy="158" r="16" fill="#C4622D" opacity=".95"/>
+              <text x="40" y="163" text-anchor="middle" font-size="13">🏔</text>
+              <!-- Home pin -->
+              <circle cx="480" cy="151" r="16" fill="#3D6B4F" opacity=".95"/>
+              <text x="480" y="156" text-anchor="middle" font-size="13">🏠</text>
+              <!-- Driver marker (starts at restaurant) -->
+              <g id="driver-marker" transform="translate(40,143)">
+                <circle r="18" fill="rgba(196,98,45,.92)" stroke="#fff" stroke-width="2.5"/>
+                <text text-anchor="middle" dy="6" font-size="15">🛵</text>
+              </g>
+            </svg>
+            <div class="map-pins">
+              <span>🏔 Pahadi Kitchen</span>
+              <span>🏠 Your doorstep</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Driver card -->
+        <div class="driver-card" id="driver-card" style="display:none;">
+          <div class="driver-avatar">🧑‍🦱</div>
+          <div class="driver-info">
+            <div class="driver-name" id="driver-name">—</div>
+            <div class="driver-meta">
+              <span id="driver-bike">—</span>
+              &nbsp;·&nbsp;
+              <span id="driver-vehicle">—</span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:1rem;font-weight:800;color:#f59e0b;">⭐ <span id="driver-rating">—</span></div>
+            <div style="font-size:.72rem;color:var(--muted);">Rating</div>
+          </div>
+        </div>
+
+        <!-- Declined notice -->
+        <div id="declined-card" class="declined-card" style="display:none;">
+          <div style="font-size:2.5rem;margin-bottom:.75rem;">😔</div>
+          <h3>Order Declined</h3>
+          <p>Sorry, we couldn't process this order right now. Please try again.</p>
+          <a href="{{ url_for('menu_page') }}" class="btn btn-primary" style="margin-top:1rem;">Order Again</a>
+        </div>
+
+        <!-- Delivered celebration -->
+        <div id="delivered-card" class="delivered-card" style="display:none;">
+          <div style="font-size:2.5rem;margin-bottom:.5rem;">🎉</div>
+          <h3>Delivered!</h3>
+          <p>Your Pahadi meal has arrived. Enjoy! 🏔</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ORDER_ID = "{{ order_id }}";
+const INITIAL  = {{ status | tojson }};
+
+// ── helpers ──────────────────────────────────────────────
+function fmtTime(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function minsLeft(fromIso, etaMins) {
+  const ms = new Date(fromIso).getTime() + etaMins * 60000 - Date.now();
+  return Math.max(0, Math.ceil(ms / 60000));
+}
+
+// ── road path for scooter positioning ────────────────────
+const road    = document.getElementById("road");
+const marker  = document.getElementById("driver-marker");
+const roadLen = road ? road.getTotalLength() : 0;
+
+function moveScooter(fromIso, etaMins) {
+  if (!road || !marker || !fromIso) return;
+  const elapsed  = Date.now() - new Date(fromIso).getTime();
+  const totalMs  = etaMins * 60000;
+  const progress = Math.min(1, elapsed / totalMs);
+  const pt       = road.getPointAtLength(roadLen * progress);
+  marker.setAttribute("transform", `translate(${pt.x}, ${pt.y - 15})`);
+}
+
+// ── main UI updater ───────────────────────────────────────
+function applyStatus(s) {
+  const st = s.status;
+
+  // ── timeline ──
+  const steps = {
+    "placed":    { dot:"tl-placed",    time:"t-placed",    val: s.created_at },
+    "accepted":  { dot:"dot-accepted", time:"t-accepted",  val: s.accepted_at   || null },
+    "preparing": { dot:"dot-preparing",time:"t-preparing", val: s.accepted_at   || null },
+    "driver":    { dot:"dot-driver",   time:"t-driver",    val: s.delivering_at || null },
+    "delivered": { dot:"dot-delivered",time:"t-delivered", val: s.delivered_at  || null },
+  };
+
+  // which steps are "done"
+  const doneMap = {
+    pending:          ["placed"],
+    accepted:         ["placed","accepted","preparing"],
+    out_for_delivery: ["placed","accepted","preparing","driver"],
+    delivered:        ["placed","accepted","preparing","driver","delivered"],
+    declined:         ["placed"],
+  };
+  const done = doneMap[st] || ["placed"];
+
+  Object.entries(steps).forEach(([key, cfg]) => {
+    const dot = document.getElementById(cfg.dot);
+    if (dot) dot.classList.toggle("done", done.includes(key));
+    const tm  = document.getElementById(cfg.time);
+    if (tm && cfg.val) tm.textContent = fmtTime(cfg.val) || "—";
+  });
+
+  // connectors
+  ["accepted","preparing","driver","delivered"].forEach((key, i) => {
+    const el = document.getElementById("conn-" + key);
+    if (el) el.classList.toggle("done", done.slice(1).length > i);
+  });
+
+  // ── status banner ──
+  const banners = {
+    pending:          {icon:"⏳", title:"Waiting for confirmation",     sub:"The restaurant will confirm shortly"},
+    accepted:         {icon:"🍳", title:"Your order is being prepared", sub:"Fresh Pahadi goodness coming your way!"},
+    out_for_delivery: {icon:"🛵", title:"On the way to you!",           sub:`${s.driver_name || "Your driver"} is heading over`},
+    delivered:        {icon:"✅", title:"Order Delivered!",             sub:"Enjoy your Pahadi feast 🏔"},
+    declined:         {icon:"❌", title:"Order Declined",               sub:"We couldn't process this order"},
+  };
+  const b = banners[st] || {icon:"⏳", title:"Processing…", sub:""};
+  document.getElementById("sb-icon").textContent  = b.icon;
+  document.getElementById("sb-title").textContent = b.title;
+  document.getElementById("sb-sub").textContent   = b.sub;
+
+  // ── conditional panels ──
+  const isDelivering = st === "out_for_delivery";
+  const isDelivered  = st === "delivered";
+  const isDeclined   = st === "declined";
+
+  document.getElementById("map-wrap").style.display      = (isDelivering || isDelivered) ? "block" : "none";
+  document.getElementById("driver-card").style.display   = (isDelivering || isDelivered) ? "flex"  : "none";
+  document.getElementById("eta-pill").style.display      = isDelivering ? "flex" : "none";
+  document.getElementById("declined-card").style.display = isDeclined   ? "block": "none";
+  document.getElementById("delivered-card").style.display= isDelivered  ? "block": "none";
+
+  // ── driver card ──
+  if (s.driver_name) {
+    document.getElementById("driver-name").textContent    = s.driver_name;
+    document.getElementById("driver-bike").textContent    = s.driver_bike    || "";
+    document.getElementById("driver-vehicle").textContent = s.driver_vehicle || "";
+    document.getElementById("driver-rating").textContent  = s.driver_rating  || "";
+  }
+
+  // ── ETA + scooter ──
+  if (isDelivering && s.delivering_at) {
+    const rem = minsLeft(s.delivering_at, s.eta_minutes || 25);
+    document.getElementById("eta-num").textContent = rem;
+    moveScooter(s.delivering_at, s.eta_minutes || 25);
+  }
+  if (isDelivered) {
+    // scooter at destination
+    if (road && marker) {
+      const pt = road.getPointAtLength(roadLen);
+      marker.setAttribute("transform", `translate(${pt.x}, ${pt.y - 15})`);
+    }
+  }
+}
+
+// ── initial render ────────────────────────────────────────
+applyStatus(INITIAL);
+
+// ── polling ───────────────────────────────────────────────
+let pollTimer;
+let scooterTimer;
+
+pollTimer = setInterval(() => {
+  fetch("/api/status/" + ORDER_ID)
+    .then(r => r.json())
+    .then(s => {
+      applyStatus(s);
+      if (s.status === "delivered" || s.status === "declined") {
+        clearInterval(pollTimer);
+        clearInterval(scooterTimer);
+      }
+    })
+    .catch(() => {});
+}, 3500);
+
+// update ETA countdown + scooter every 10 s
+scooterTimer = setInterval(() => {
+  fetch("/api/status/" + ORDER_ID)
+    .then(r => r.json())
+    .then(s => {
+      if (s.status === "out_for_delivery" && s.delivering_at) {
+        const rem = minsLeft(s.delivering_at, s.eta_minutes || 25);
+        const el  = document.getElementById("eta-num");
+        if (el) el.textContent = rem;
+        moveScooter(s.delivering_at, s.eta_minutes || 25);
+      }
+    })
+    .catch(() => {});
+}, 10000);
+</script>
+{% endblock %}

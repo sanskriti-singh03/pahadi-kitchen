@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+    <div>
+      <h1>⚙️ Admin Panel</h1>
+      <p>Pahadi Kitchen — Menu &amp; Order Management</p>
+    </div>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="container">
+
+    <!-- Tab nav -->
+    <div class="tab-nav">
+      <button class="tab-btn" data-tab="menu-tab">🍽 Menu Items</button>
+      <button class="tab-btn" data-tab="add-tab">➕ Add Item</button>
+      <button class="tab-btn" data-tab="orders-tab">📋 All Orders</button>
+    </div>
+
+    <!-- ── Tab: Menu Items ── -->
+    <div class="tab-panel" id="menu-tab">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name &amp; Description</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in menu.values() %}
+          <tr>
+            <td><code>{{ item.item_id }}</code></td>
+            <td>
+              <strong>{{ item.name }}</strong>
+              {% if item.desc %}
+                <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem;">{{ item.desc[:70] }}{% if item.desc|length > 70 %}…{% endif %}</div>
+              {% endif %}
+            </td>
+            <td><span class="badge badge-green">{{ cat_icons.get(item.category,'🍽') }} {{ item.category }}</span></td>
+            <td style="font-weight:700;color:var(--accent);">Rs. {{ "%.2f"|format(item.price) }}</td>
+            <td style="white-space:nowrap;">
+              <!-- Edit button triggers modal -->
+              <button class="btn btn-green btn-sm"
+                onclick="openEdit({{ item.item_id }}, '{{ item.name|replace("'", "\\'") }}', '{{ item.category }}', {{ item.price }}, '{{ item.desc|replace("'", "\\'") }}')">
+                Edit
+              </button>
+              <a href="{{ url_for('admin_remove_item', item_id=item.item_id) }}"
+                 class="btn btn-danger btn-sm"
+                 onclick="return confirm('Remove {{ item.name }}?')">Remove</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Tab: Add Item ── -->
+    <div class="tab-panel" id="add-tab">
+      <div class="admin-form-card">
+        <h3>Add New Menu Item</h3>
+        <form method="post" action="{{ url_for('admin_add_item') }}">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input type="text" name="name" placeholder="e.g. Phaanu" required>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select name="category" required>
+                <option value="">— select —</option>
+                <option value="Starters">🥗 Starters</option>
+                <option value="Main Course">🍛 Main Course</option>
+                <option value="Breads">🫓 Breads</option>
+                <option value="Desserts">🍮 Desserts</option>
+                <option value="Drinks">🥤 Drinks</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Price (Rs.)</label>
+            <input type="number" name="price" placeholder="e.g. 120" min="1" step="0.5" required>
+          </div>
+          <div class="form-group">
+            <label>Description <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+            <textarea name="desc" placeholder="Short description of the dish…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add to Menu</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Tab: All Orders ── -->
+    <div class="tab-panel" id="orders-tab">
+      {% if orders %}
+        <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem;">{{ orders|length }} order(s) total</p>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date &amp; Time</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            {% set s = o.status %}
+            <tr>
+              <td>
+                <a href="{{ url_for('track_order', order_id=o.id) }}" target="_blank"
+                   style="font-family:monospace;font-size:.78rem;color:var(--accent);">{{ o.id }}</a>
+              </td>
+              <td>
+                <span class="badge badge-brown">{{ o.customer or 'Guest' }}</span>
+                {% if o.phone %}<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem;">{{ o.phone }}</div>{% endif %}
+              </td>
+              <td style="color:var(--muted);font-size:.82rem;">{{ o.date }}</td>
+              <td style="font-weight:700;color:var(--accent);">Rs. {{ o.total }}</td>
+              <td>
+                {% if s == 'pending' %}
+                  <span class="badge" style="background:#fef9c3;color:#854d0e;">⏳ Pending</span>
+                {% elif s == 'accepted' %}
+                  <span class="badge" style="background:#dbeafe;color:#1e40af;">🍳 Preparing</span>
+                {% elif s == 'out_for_delivery' %}
+                  <span class="badge" style="background:#dcfce7;color:#166534;">🛵 Delivering</span>
+                {% elif s == 'delivered' %}
+                  <span class="badge badge-green">✅ Delivered</span>
+                {% elif s == 'declined' %}
+                  <span class="badge" style="background:#fee2e2;color:#991b1b;">❌ Declined</span>
+                {% else %}
+                  <span class="badge" style="background:#f3f4f6;color:#6b7280;">{{ s }}</span>
+                {% endif %}
+              </td>
+              <td style="white-space:nowrap;">
+                {% if s == 'pending' %}
+                  <a href="{{ url_for('admin_accept_order', order_id=o.id) }}"
+                     class="btn btn-green btn-sm"
+                     onclick="return confirm('Accept this order?')">✔ Accept</a>
+                  <a href="{{ url_for('admin_decline_order', order_id=o.id) }}"
+                     class="btn btn-danger btn-sm"
+                     onclick="return confirm('Decline this order?')">✘ Decline</a>
+                {% elif s == 'accepted' %}
+                  <a href="{{ url_for('admin_ready_order', order_id=o.id) }}"
+                     class="btn btn-primary btn-sm"
+                     onclick="return confirm('Mark as ready & assign driver?')">🛵 Ready for Pickup</a>
+                {% elif s == 'out_for_delivery' %}
+                  <a href="{{ url_for('admin_delivered_order', order_id=o.id) }}"
+                     class="btn btn-green btn-sm"
+                     onclick="return confirm('Mark as delivered?')">✅ Mark Delivered</a>
+                {% else %}
+                  <span style="color:var(--muted);font-size:.8rem;">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty">
+          <div class="e-icon">📋</div>
+          <h3>No orders yet</h3>
+          <p>Orders will appear here once customers start placing them.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Edit Item Modal ── -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:2rem;width:100%;max-width:500px;margin:1rem;position:relative;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;">Edit Menu Item</h2>
+      <button onclick="closeEdit()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+    </div>
+
+    <form method="post" action="{{ url_for('admin_edit_item') }}" id="edit-form">
+      <input type="hidden" name="item_id" id="edit-id">
+
+      <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" name="name" id="edit-name" required
+               style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" id="edit-category" required
+                  style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;background:var(--bg);">
+            <option value="Starters">🥗 Starters</option>
+            <option value="Main Course">🍛 Main Course</option>
+            <option value="Breads">🫓 Breads</option>
+            <option value="Desserts">🍮 Desserts</option>
+            <option value="Drinks">🥤 Drinks</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (Rs.)</label>
+          <input type="number" name="price" id="edit-price" min="1" step="0.5" required
+                 style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="desc" id="edit-desc" rows="3"
+                  placeholder="Short description of the dish…"
+                  style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem;">
+        <button type="button" onclick="closeEdit()" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEdit(id, name, category, price, desc) {
+  document.getElementById('edit-id').value       = id;
+  document.getElementById('edit-name').value     = name;
+  document.getElementById('edit-price').value    = price;
+  document.getElementById('edit-desc').value     = desc;
+  const sel = document.getElementById('edit-category');
+  for (let opt of sel.options) opt.selected = (opt.value === category);
+  const modal = document.getElementById('edit-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+// close on backdrop click
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+</script>
+{% endblock %}

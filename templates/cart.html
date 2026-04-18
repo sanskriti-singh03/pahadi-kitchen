@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Cart — Pahadi Kitchen{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="container">
+    <h1 class="page-title">Your Cart</h1>
+    <p class="page-sub">Review your order before placing it</p>
+
+    {% if rows %}
+    <div class="cart-layout">
+
+      <!-- Items panel -->
+      <div>
+        <div class="cart-panel">
+          <div class="cart-panel-head">
+            <h2>Order Items</h2>
+            <a href="{{ url_for('cart_clear') }}" class="btn btn-outline btn-sm"
+               onclick="return confirm('Clear your entire cart?')">Clear All</a>
+          </div>
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              <tr>
+                <td>
+                  <div class="ci-name">{{ r.item.name }}</div>
+                  <div class="ci-cat">{{ r.item.category }}</div>
+                </td>
+                <td class="ci-price">Rs. {{ "%.2f"|format(r.item.price) }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('cart_update') }}" class="qty-form">
+                    <input type="hidden" name="item_id" value="{{ r.item.item_id }}">
+                    <button type="button" class="cart-dec">−</button>
+                    <input type="number" name="qty" value="{{ r.qty }}" min="0" max="99" class="cart-qty-input" style="width:52px;padding:.3rem .4rem;text-align:center;border:1.5px solid var(--border);border-radius:6px;font-family:'Nunito',sans-serif;font-size:.875rem;font-weight:700;">
+                    <button type="button" class="cart-inc">+</button>
+                    <button type="submit" style="display:none"></button>
+                  </form>
+                </td>
+                <td class="ci-total">Rs. {{ "%.2f"|format(r.amount) }}</td>
+                <td>
+                  <a href="{{ url_for('cart_remove', item_id=r.item.item_id) }}" class="remove-btn" title="Remove">✕</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:1rem;">
+          <a href="{{ url_for('menu_page') }}" class="btn btn-outline">← Continue Shopping</a>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="order-summary">
+        <div class="summary-title">Order Summary</div>
+
+        {% for r in rows %}
+        <div class="s-row">
+          <span class="label">{{ r.item.name }} × {{ r.qty }}</span>
+          <span>Rs. {{ "%.2f"|format(r.amount) }}</span>
+        </div>
+        {% endfor %}
+
+        <hr class="s-divider">
+        <div class="s-row">
+          <span class="label">Subtotal</span>
+          <span>Rs. {{ "%.2f"|format(subtotal) }}</span>
+        </div>
+        <div class="s-row">
+          <span class="label">GST (5%)</span>
+          <span>Rs. {{ "%.2f"|format(tax) }}</span>
+        </div>
+        <div class="s-row total-row">
+          <span>Total</span>
+          <span>Rs. {{ "%.2f"|format(total) }}</span>
+        </div>
+
+        <form method="post" action="{{ url_for('place_order') }}" style="margin-top:1.5rem;">
+          <div style="margin-bottom:1rem;">
+            <label style="display:block;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.35rem;">
+              📱 Mobile Number <span style="font-weight:400;text-transform:none;">(for SMS updates)</span>
+            </label>
+            <input type="tel" name="phone" placeholder="+91 98765 43210"
+                   style="width:100%;padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;background:var(--bg);color:var(--primary);outline:none;">
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block">
+            Place Order 🏔
+          </button>
+        </form>
+
+        {% if not current_user or current_user == 'Guest' %}
+        <p style="text-align:center;font-size:.78rem;color:var(--muted);margin-top:.75rem;">
+          <a href="{{ url_for('login') }}" style="color:var(--accent);font-weight:700;">Log in</a>
+          to save your order history
+        </p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    {% else %}
+    <div class="empty">
+      <div class="e-icon">🛒</div>
+      <h3>Your cart is empty</h3>
+      <p>Add some delicious Pahadi dishes to get started!</p>
+      <a href="{{ url_for('menu_page') }}" class="btn btn-primary" style="margin-top:1.25rem;">Browse Menu</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
