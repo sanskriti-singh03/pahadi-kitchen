@@ -759,7 +759,9 @@ def admin_delivered_order(order_id):
 # Boot
 # ════════════════════════════════════════════════════════════
 
+# Run on startup regardless of how the app is launched (gunicorn or direct)
+ensure_dirs()
+initialize_menu()
+
 if __name__ == "__main__":
-    ensure_dirs()
-    initialize_menu()
     app.run(debug=True, port=5001)
