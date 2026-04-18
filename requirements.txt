@@ -2,3 +2,5 @@ flask
 gunicorn
 python-dotenv
 twilio
+flask-sqlalchemy
+psycopg2-binary

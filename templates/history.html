@@ -12,11 +12,11 @@
         {% for o in orders %}
         <div class="order-row">
           <div>
-            <div style="font-weight:700;font-size:.95rem;">{{ o.id }}</div>
-            <div class="o-date">{{ o.date }}</div>
+            <div style="font-weight:700;font-size:.95rem;">{{ o.order_id }}</div>
+            <div class="o-date">{{ o.timestamp }}</div>
           </div>
-          <div class="o-total">Rs. {{ o.total }}</div>
-          <a href="{{ url_for('view_order', order_id=o.id) }}" class="btn btn-outline btn-sm">View Bill</a>
+          <div class="o-total">Rs. {{ "%.2f"|format(o.total) }}</div>
+          <a href="{{ url_for('view_order', order_id=o.order_id) }}" class="btn btn-outline btn-sm">View Bill</a>
         </div>
         {% endfor %}
       </div>
