@@ -31,6 +31,12 @@ if DATABASE_URL.startswith("postgres://"):
 
 app.config["SQLALCHEMY_DATABASE_URI"]        = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Keep connections healthy after periods of inactivity (Supabase free tier sleeps)
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping":  True,   # test connection before using it
+    "pool_recycle":   280,    # recycle connections every ~4.5 min (Supabase kills at 5 min)
+    "connect_args":   {"connect_timeout": 10} if DATABASE_URL.startswith("postgresql") else {},
+}
 
 db = SQLAlchemy(app)
 
@@ -201,6 +207,23 @@ def compute_cart(menu_map):
     tax   = round(subtotal * TAX_RATE, 2)
     total = round(subtotal + tax, 2)
     return rows, subtotal, tax, total
+
+
+# ════════════════════════════════════════════════════════════
+# Lazy DB init (handles Supabase free-tier sleep)
+# ════════════════════════════════════════════════════════════
+
+_db_ready = False
+
+@app.before_request
+def ensure_db():
+    global _db_ready
+    if not _db_ready:
+        try:
+            initialize_db()
+            _db_ready = True
+        except Exception as e:
+            print(f"[before_request] DB not ready yet: {e}")
 
 
 # ════════════════════════════════════════════════════════════
@@ -686,7 +709,10 @@ def admin_logout():
 # ════════════════════════════════════════════════════════════
 
 with app.app_context():
-    initialize_db()
+    try:
+        initialize_db()
+    except Exception as _e:
+        print(f"[startup] DB init skipped (will retry on first request): {_e}")
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
